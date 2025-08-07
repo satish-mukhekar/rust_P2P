@@ -1,0 +1,23 @@
+[package]
+name = "ethereum-bootnode"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libp2p = { version = "0.54", features = [
+    "tokio", "tcp", "noise", "yamux", "gossipsub", 
+    "mdns", "kad", "identify", "ping", "macros"
+]}
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+futures = "0.3"
+sha2 = "0.10.9"
+
+[[bin]]
+name = "test_client"
+path = "src/test_client.rs"
