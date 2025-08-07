@@ -105,19 +105,14 @@ impl SecureBootnode {
         })
     }
 
-    pub async fn start(&mut self, _port: u16) -> Result<()> {
-    // Read PORT from environment or fallback to 30303
-    let port = std::env::var("PORT")
-        .unwrap_or_else(|_| "30303".to_string())
-        .parse::<u16>()
-        .expect("Invalid PORT environment variable");
-
+    pub async fn start(&mut self, port: u16) -> Result<()> {
     let listen_addr: Multiaddr = format!("/ip4/0.0.0.0/tcp/{}", port).parse()?;
     self.swarm.listen_on(listen_addr.clone())?;
 
     info!("🚀 Bootnode starting on port {}", port);
     info!("🔗 Connect using: /ip4/127.0.0.1/tcp/{}", port);
 
+    // Main event loop
     let mut maintenance_interval = tokio::time::interval(Duration::from_secs(60));
 
     loop {

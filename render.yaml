@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: eth-libp2p-node
+    env: rust
+    buildCommand: "cargo build --release"
+    startCommand: "./target/release/eth_libp2p_node"
+    envVars:
+      - key: PORT
+        value: 30303
