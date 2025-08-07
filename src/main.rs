@@ -408,7 +408,7 @@ async fn main() -> Result<()> {
                 .long("port")
                 .value_name("PORT")
                 .help("Port to listen on")
-                .default_value("30303"),
+                .default_value("40404"),
         )
         .arg(
             Arg::new("max-peers")
