@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::env;
 use clap::{Arg, Command};
 use futures::stream::StreamExt;
 use libp2p::{
@@ -105,28 +106,33 @@ impl SecureBootnode {
         })
     }
 
-    pub async fn start(&mut self, port: u16) -> Result<()> {
-    let listen_addr: Multiaddr = format!("/ip4/0.0.0.0/tcp/{}", port).parse()?;
-    self.swarm.listen_on(listen_addr.clone())?;
+    pub async fn start(&mut self) -> Result<()> {
+        // Get port from environment or default to 3000
+        let port: u16 = env::var("PORT")
+            .ok()
+            .and_then(|p| p.parse().ok())
+            .unwrap_or(3000);
 
-    info!("🚀 Bootnode starting on port {}", port);
-    info!("🔗 Connect using: /ip4/127.0.0.1/tcp/{}", port);
+        let listen_addr: Multiaddr = format!("/ip4/0.0.0.0/tcp/{}", port).parse()?;
+        self.swarm.listen_on(listen_addr.clone())?;
 
-    // Main event loop
-    let mut maintenance_interval = tokio::time::interval(Duration::from_secs(60));
+        info!("🚀 Bootnode starting on port {}", port);
+        info!("🔗 Connect using: /ip4/127.0.0.1/tcp/{}", port);
 
-    loop {
-        tokio::select! {
-            event = self.swarm.select_next_some() => {
-                self.handle_swarm_event(event).await?;
-            }
-            _ = maintenance_interval.tick() => {
-                self.maintenance().await;
+        // Main event loop
+        let mut maintenance_interval = tokio::time::interval(Duration::from_secs(60));
+
+        loop {
+            tokio::select! {
+                event = self.swarm.select_next_some() => {
+                    self.handle_swarm_event(event).await?;
+                }
+                _ = maintenance_interval.tick() => {
+                    self.maintenance().await;
+                }
             }
         }
     }
-}
-
 
     async fn handle_swarm_event(
         &mut self,
@@ -455,7 +461,7 @@ async fn main() -> Result<()> {
                 .long("port")
                 .value_name("PORT")
                 .help("Port to listen on")
-                .default_value("40404"),
+                .default_value("30303"),
         )
         .arg(
             Arg::new("max-peers")
@@ -475,7 +481,7 @@ async fn main() -> Result<()> {
 
     // Create and start bootnode
     let mut bootnode = SecureBootnode::new(max_peers).await?;
-    bootnode.start(port).await?;
+    bootnode.start().await?;
 
     Ok(())
 }
